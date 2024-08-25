@@ -1,11 +1,16 @@
 use bevy::{
-    color::palettes::css::{SADDLE_BROWN, SANDY_BROWN},
+    color::palettes::{
+        css::{SADDLE_BROWN, SANDY_BROWN},
+        tailwind::GREEN_100,
+    },
     prelude::*,
 };
-use bevy_mod_picking::PickableBundle;
+use bevy_mod_picking::prelude::*;
 use components::Square;
+use systems::{define_possible_moves, set_selected_piece};
 
 pub mod components;
+pub mod systems;
 
 pub fn setup_board(
     mut commands: Commands,
@@ -16,6 +21,14 @@ pub fn setup_board(
     let mesh = meshes.add(Mesh::from(Plane3d::default().mesh().size(1., 1.)));
     let white_material = materials.add(Color::from(SANDY_BROWN));
     let black_material = materials.add(Color::from(SADDLE_BROWN));
+    let possible_move = materials.add(Color::from(GREEN_100));
+
+    commands.insert_resource(TilesHandles {
+        white: white_material.clone(),
+        black: black_material.clone(),
+        possible_move,
+        mesh: mesh.clone(),
+    });
 
     // Spawn 64 squares
     for i in 0..8 {
@@ -45,8 +58,26 @@ pub fn setup_board(
                 Square { x: i, y: j },
                 PickableBundle::default(),
                 crate::picking::HIGHLIGHT_TINT.clone(),
+                On::<Pointer<Click>>::send_event::<SelectedEvent>(),
             ));
         }
+    }
+}
+
+#[derive(Debug, Clone, Reflect, Event)]
+pub struct SelectedEvent(Entity);
+
+#[derive(Debug, Clone, Reflect, Resource)]
+pub struct TilesHandles {
+    pub white: Handle<StandardMaterial>,
+    pub black: Handle<StandardMaterial>,
+    pub possible_move: Handle<StandardMaterial>,
+    pub mesh: Handle<Mesh>,
+}
+
+impl From<ListenerInput<Pointer<Click>>> for SelectedEvent {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        Self(event.target)
     }
 }
 
@@ -55,6 +86,14 @@ pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup_board);
+        app.add_event::<SelectedEvent>()
+            .add_systems(Startup, setup_board)
+            .add_systems(
+                Update,
+                (
+                    set_selected_piece.before(define_possible_moves),
+                    define_possible_moves,
+                ),
+            );
     }
 }

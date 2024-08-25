@@ -6,6 +6,7 @@ use bevy_mod_picking::prelude::Pickable;
 use components::{Piece, PieceColor, PieceType};
 
 pub mod components;
+pub mod helper;
 
 static GLB_PIECES_PATH: &str = "models/pieces.glb";
 

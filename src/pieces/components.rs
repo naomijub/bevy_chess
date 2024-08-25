@@ -2,6 +2,12 @@ use bevy::prelude::*;
 
 use crate::board::components::Square;
 
+#[derive(Debug, Clone, Component, Reflect)]
+pub struct Selected {
+    pub color: PieceColor,
+    pub piece_type: PieceType,
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect)]
 pub enum PieceColor {
     White,
@@ -28,7 +34,7 @@ pub struct Piece {
 
 impl PartialEq<Square> for Piece {
     fn eq(&self, other: &Square) -> bool {
-        self.x == other.x && self.y == other.y
+        self.x as i16 == other.x as i16 && self.y as i16 == other.y as i16
     }
 }
 
