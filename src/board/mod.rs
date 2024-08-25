@@ -2,6 +2,10 @@ use bevy::{
     color::palettes::css::{SADDLE_BROWN, SANDY_BROWN},
     prelude::*,
 };
+use bevy_mod_picking::PickableBundle;
+use components::Square;
+
+pub mod components;
 
 pub fn setup_board(
     mut commands: Commands,
@@ -38,6 +42,9 @@ pub fn setup_board(
                     transform: Transform::from_translation(Vec3::new(i as f32, 0., j as f32)),
                     ..Default::default()
                 },
+                Square { x: i, y: j },
+                PickableBundle::default(),
+                crate::picking::HIGHLIGHT_TINT.clone(),
             ));
         }
     }

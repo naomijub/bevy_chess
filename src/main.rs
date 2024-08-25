@@ -7,6 +7,7 @@ use bevy::{
 #[cfg(feature = "debugger")]
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
+use bevy_mod_picking::DefaultPickingPlugins;
 use chess::{
     board::setup_board,
     debugger::{toggle_theme, toggle_vsync, toggle_window_controls},
@@ -46,6 +47,7 @@ fn main() {
                 bevy::input::common_conditions::input_toggle_active(false, KeyCode::Escape),
             ),
         ))
+        .add_plugins(DefaultPickingPlugins)
         .add_systems(Startup, (setup_base, setup_board, spawn_pieces))
         .add_systems(Update, (toggle_theme, toggle_vsync, toggle_window_controls))
         .run();
