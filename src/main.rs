@@ -9,10 +9,7 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use bevy_mod_picking::DefaultPickingPlugins;
 use chess::{
-    board::setup_board,
-    debugger::{toggle_theme, toggle_vsync, toggle_window_controls},
-    pieces::spawn_pieces,
-    setup::setup_base,
+    board::BoardPlugin, debugger::DebuggerPlugin, pieces::PiecesPlugin, setup::setup_base,
 };
 
 fn main() {
@@ -47,8 +44,12 @@ fn main() {
                 bevy::input::common_conditions::input_toggle_active(false, KeyCode::Escape),
             ),
         ))
-        .add_plugins(DefaultPickingPlugins)
-        .add_systems(Startup, (setup_base, setup_board, spawn_pieces))
-        .add_systems(Update, (toggle_theme, toggle_vsync, toggle_window_controls))
+        .add_plugins((
+            DefaultPickingPlugins,
+            DebuggerPlugin,
+            BoardPlugin,
+            PiecesPlugin,
+        ))
+        .add_systems(Startup, setup_base)
         .run();
 }

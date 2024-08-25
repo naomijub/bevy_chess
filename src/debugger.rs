@@ -3,6 +3,18 @@ use bevy::{
     window::{PresentMode, WindowTheme},
 };
 
+#[derive(Resource, Debug, Clone, Reflect, PartialEq, Eq)]
+pub struct DebuggerPlugin;
+
+impl Plugin for DebuggerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            PostUpdate,
+            (toggle_theme, toggle_vsync, toggle_window_controls),
+        );
+    }
+}
+
 pub fn toggle_vsync(input: Res<ButtonInput<KeyCode>>, mut windows: Query<&mut Window>) {
     if input.just_pressed(KeyCode::KeyV) {
         let mut window = windows.single_mut();

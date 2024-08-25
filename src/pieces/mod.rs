@@ -9,6 +9,15 @@ pub mod components;
 
 static GLB_PIECES_PATH: &str = "models/pieces.glb";
 
+#[derive(Resource, Debug, Clone, Reflect, PartialEq, Eq)]
+pub struct PiecesPlugin;
+
+impl Plugin for PiecesPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Startup, spawn_pieces);
+    }
+}
+
 pub fn spawn_pieces(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
