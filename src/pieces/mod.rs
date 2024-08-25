@@ -14,7 +14,14 @@ pub struct PiecesPlugin;
 
 impl Plugin for PiecesPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_pieces);
+        app.add_systems(Startup, spawn_pieces)
+            .add_systems(PostStartup, add_pieces_name);
+    }
+}
+
+pub fn add_pieces_name(mut commands: Commands, pieces: Query<(Entity, &Piece)>) {
+    for (entity, piece) in pieces.iter() {
+        commands.entity(entity).insert(piece.name());
     }
 }
 
