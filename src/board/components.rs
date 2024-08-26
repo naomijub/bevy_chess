@@ -8,6 +8,12 @@ pub struct Square {
     pub y: i8,
 }
 
+#[derive(Debug, Clone, Reflect, PartialEq, Eq, Component)]
+pub enum PossibleMove {
+    Enemy,
+    Empty,
+}
+
 impl Square {
     pub const fn is_white(&self) -> bool {
         (self.x + self.y + 1) % 2 == 0

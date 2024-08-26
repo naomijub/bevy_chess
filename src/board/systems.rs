@@ -1,8 +1,14 @@
 use bevy::prelude::*;
 
-use crate::pieces::components::{Piece, Selected};
+use crate::pieces::{
+    components::{Piece, Selected},
+    helper::Contains,
+};
 
-use super::{components::Square, SelectedEvent, TilesHandles};
+use super::{
+    components::{PossibleMove, Square},
+    SelectedEvent, TilesHandles,
+};
 
 pub fn set_selected_piece(
     mut events: EventReader<SelectedEvent>,
@@ -38,8 +44,11 @@ pub fn set_selected_piece(
 }
 
 pub fn define_possible_moves(
+    mut commands: Commands,
     mut tiles: Query<(Entity, &Square, &mut Handle<StandardMaterial>)>,
+    board_pieces: Query<(Entity, &Piece)>,
     selected_pieces: Query<(Entity, &Square, &Selected)>,
+    previous_possible_moves: Query<Entity, With<PossibleMove>>,
     tiles_handle: Res<TilesHandles>,
 ) {
     let Ok((selected_entity, square, selected)) = selected_pieces.get_single() else {
@@ -49,18 +58,28 @@ pub fn define_possible_moves(
     let possible_moves =
         crate::pieces::helper::possible_moves(selected.piece_type, selected.color, square);
 
+    previous_possible_moves.iter().for_each(|entity| {
+        commands.entity(entity).remove::<PossibleMove>();
+    });
+
     for (entity, tile, mut material) in tiles.iter_mut() {
         if entity == selected_entity {
             continue;
         }
-        if possible_moves.contains(tile) {
-            *material = tiles_handle.possible_move.clone();
-        } else {
-            *material = if tile.is_white() {
-                tiles_handle.white.clone()
+        *material = if possible_moves.contains(tile) {
+            if board_pieces.contains_color(tile, &selected.color.opposite()) {
+                commands.entity(entity).insert(PossibleMove::Enemy);
+                tiles_handle.enemy_piece.clone()
+            } else if board_pieces.contains_color(tile, &selected.color) {
+                tiles_handle.blocked_move.clone()
             } else {
-                tiles_handle.black.clone()
-            };
+                commands.entity(entity).insert(PossibleMove::Empty);
+                tiles_handle.possible_move.clone()
+            }
+        } else if tile.is_white() {
+            tiles_handle.white.clone()
+        } else {
+            tiles_handle.black.clone()
         }
     }
 }

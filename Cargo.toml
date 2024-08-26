@@ -5,7 +5,7 @@ edition = "2021"
 
 [features]
 debugger = ["dep:egui", "dep:bevy_egui", "dep:bevy-inspector-egui", "bevy_mod_picking/debug"]
-default = ["debugger"]
+# default = ["debugger"]
 
 [dependencies]
 bevy_mod_picking = "0.20"

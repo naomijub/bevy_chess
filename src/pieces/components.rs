@@ -43,3 +43,12 @@ impl Piece {
         Name::new(format!("{:?} {:?}", self.piece_type, self.color))
     }
 }
+
+impl PieceColor {
+    pub const fn opposite(&self) -> Self {
+        match self {
+            Self::White => Self::Black,
+            Self::Black => Self::White,
+        }
+    }
+}
