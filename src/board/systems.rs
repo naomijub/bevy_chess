@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::pieces::{
-    components::{Piece, Selected},
+    components::{Piece, PieceType, Selected},
     helper::Contains,
 };
 
@@ -55,8 +55,18 @@ pub fn define_possible_moves(
         return;
     };
 
-    let possible_moves =
-        crate::pieces::helper::possible_moves(selected.piece_type, selected.color, square);
+    let is_pawn_first_move = board_pieces
+        .iter()
+        .find(|(_, piece)| piece == &square)
+        .map(|(_, piece)| piece.first_move && piece.piece_type == PieceType::Pawn)
+        .unwrap_or_default();
+
+    let possible_moves = crate::pieces::helper::possible_moves(
+        selected.piece_type,
+        selected.color,
+        square,
+        is_pawn_first_move,
+    );
 
     previous_possible_moves.iter().for_each(|entity| {
         commands.entity(entity).remove::<PossibleMove>();
@@ -71,7 +81,7 @@ pub fn define_possible_moves(
                 commands.entity(entity).insert(PossibleMove::Enemy);
                 tiles_handle.enemy_piece.clone()
             } else if board_pieces.contains_color(tile, &selected.color) {
-                tiles_handle.blocked_move.clone()
+                continue;
             } else {
                 commands.entity(entity).insert(PossibleMove::Empty);
                 tiles_handle.possible_move.clone()

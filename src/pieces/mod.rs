@@ -217,6 +217,7 @@ pub fn spawn_king(
                 piece_type: PieceType::King,
                 x: position.0,
                 y: position.1,
+                first_move: true,
             },
             Pickable::IGNORE,
         ))
@@ -275,6 +276,7 @@ pub fn spawn_knight(
                 piece_type: PieceType::Knight,
                 x: position.0,
                 y: position.1,
+                first_move: true,
             },
             Pickable::IGNORE,
         ))
@@ -331,6 +333,7 @@ pub fn spawn_queen(
                 piece_type: PieceType::Queen,
                 x: position.0,
                 y: position.1,
+                first_move: true,
             },
             Pickable::IGNORE,
         ))
@@ -373,6 +376,7 @@ pub fn spawn_bishop(
                 piece_type: PieceType::Bishop,
                 x: position.0,
                 y: position.1,
+                first_move: true,
             },
             Pickable::IGNORE,
         ))
@@ -415,6 +419,7 @@ pub fn spawn_rook(
                 piece_type: PieceType::Rook,
                 x: position.0,
                 y: position.1,
+                first_move: true,
             },
             Pickable::IGNORE,
         ))
@@ -457,6 +462,7 @@ pub fn spawn_pawn(
                 piece_type: PieceType::Pawn,
                 x: position.0,
                 y: position.1,
+                first_move: true,
             },
             Pickable::IGNORE,
         ))

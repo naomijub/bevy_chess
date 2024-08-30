@@ -24,12 +24,13 @@ pub enum PieceType {
     Pawn,
 }
 
-#[derive(Clone, Component, Eq, PartialEq, Reflect)]
+#[derive(Debug, Clone, Component, Eq, PartialEq, Reflect)]
 pub struct Piece {
     pub color: PieceColor,
     pub piece_type: PieceType,
     pub x: u8,
     pub y: u8,
+    pub first_move: bool,
 }
 
 impl PartialEq<Square> for Piece {

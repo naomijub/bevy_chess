@@ -1,7 +1,7 @@
 use bevy::{
     color::palettes::{
         css::{SADDLE_BROWN, SANDY_BROWN},
-        tailwind::{BLUE_500, GREEN_100, RED_300},
+        tailwind::{BLUE_500, GREEN_300},
     },
     prelude::*,
 };
@@ -18,18 +18,16 @@ pub fn setup_board(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Add meshes and materials
-    let mesh = meshes.add(Mesh::from(Plane3d::default().mesh().size(1., 1.)));
+    let mesh = meshes.add(Mesh::from(Plane3d::default().mesh().size(0.98, 0.98)));
     let white_material = materials.add(Color::from(SANDY_BROWN));
     let black_material = materials.add(Color::from(SADDLE_BROWN));
-    let possible_move = materials.add(Color::from(GREEN_100));
-    let blocked_move = materials.add(Color::from(RED_300));
+    let possible_move = materials.add(Color::from(GREEN_300));
     let enemy_piece = materials.add(Color::from(BLUE_500));
 
     commands.insert_resource(TilesHandles {
         white: white_material.clone(),
         black: black_material.clone(),
         possible_move,
-        blocked_move,
         enemy_piece,
         mesh: mesh.clone(),
     });
@@ -76,7 +74,6 @@ pub struct TilesHandles {
     pub white: Handle<StandardMaterial>,
     pub black: Handle<StandardMaterial>,
     pub possible_move: Handle<StandardMaterial>,
-    pub blocked_move: Handle<StandardMaterial>,
     pub enemy_piece: Handle<StandardMaterial>,
     pub mesh: Handle<Mesh>,
 }
