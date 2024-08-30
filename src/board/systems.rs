@@ -55,17 +55,17 @@ pub fn define_possible_moves(
         return;
     };
 
-    let is_pawn_first_move = board_pieces
+    let can_pawn = board_pieces
         .iter()
+        .filter(|(_, piece)| piece.piece_type == PieceType::Pawn)
         .find(|(_, piece)| piece == &square)
-        .map(|(_, piece)| piece.first_move && piece.piece_type == PieceType::Pawn)
-        .unwrap_or_default();
+        .map(|(_, piece)| piece);
 
     let possible_moves = crate::pieces::helper::possible_moves(
         selected.piece_type,
         selected.color,
         square,
-        is_pawn_first_move,
+        can_pawn.map(|piece| piece.first_move).unwrap_or_default(),
     );
 
     previous_possible_moves.iter().for_each(|entity| {
@@ -83,6 +83,9 @@ pub fn define_possible_moves(
             } else if board_pieces.contains_color(tile, &selected.color) {
                 continue;
             } else {
+                if can_pawn.is_some() && !possible_moves[2..].contains(tile) {
+                    continue;
+                }
                 commands.entity(entity).insert(PossibleMove::Empty);
                 tiles_handle.possible_move.clone()
             }
