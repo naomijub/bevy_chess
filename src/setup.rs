@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
 
-pub fn setup_base(mut commands: Commands) {
+pub fn ambient(mut commands: Commands) {
     commands.spawn(Camera3dBundle {
         projection: OrthographicProjection {
             scale: 1.0,
