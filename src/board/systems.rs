@@ -14,8 +14,9 @@ pub fn set_selected_piece(
     mut events: EventReader<SelectedEvent>,
     mut commands: Commands,
     pieces: Query<(Entity, &Piece)>,
-    tiles: Query<(Entity, &Square)>,
+    mut tiles: Query<(Entity, &Square, &mut Handle<StandardMaterial>)>,
     previous_selected: Query<Entity, With<Selected>>,
+    tiles_handle: Res<TilesHandles>,
 ) {
     let Some(&SelectedEvent(selected_entity)) = events.read().next() else {
         return;
@@ -25,7 +26,18 @@ pub fn set_selected_piece(
         commands.entity(entity).remove::<Selected>();
     });
 
-    let Ok((tile, square)) = tiles.get(selected_entity) else {
+    for (entity, tile, mut material) in tiles.iter_mut() {
+        if entity == selected_entity {
+            continue;
+        }
+        *material = if tile.is_white() {
+            tiles_handle.white.clone()
+        } else {
+            tiles_handle.black.clone()
+        }
+    }
+
+    let Ok((selected_tile, square, _)) = tiles.get(selected_entity) else {
         return;
     };
 
@@ -37,7 +49,7 @@ pub fn set_selected_piece(
         color: selected_piece.1.color,
         piece_type: selected_piece.1.piece_type,
     });
-    commands.entity(tile).insert(Selected {
+    commands.entity(selected_tile).insert(Selected {
         color: selected_piece.1.color,
         piece_type: selected_piece.1.piece_type,
     });
@@ -76,10 +88,10 @@ pub fn define_possible_moves(
         if entity == selected_entity {
             continue;
         }
-        *material = if possible_moves.contains(tile) {
+        if possible_moves.contains(tile) {
             if board_pieces.contains_color(tile, &selected.color.opposite()) {
                 commands.entity(entity).insert(PossibleMove::Enemy);
-                tiles_handle.enemy_piece.clone()
+                *material = tiles_handle.enemy_piece.clone();
             } else if board_pieces.contains_color(tile, &selected.color) {
                 continue;
             } else {
@@ -87,12 +99,8 @@ pub fn define_possible_moves(
                     continue;
                 }
                 commands.entity(entity).insert(PossibleMove::Empty);
-                tiles_handle.possible_move.clone()
+                *material = tiles_handle.possible_move.clone();
             }
-        } else if tile.is_white() {
-            tiles_handle.white.clone()
-        } else {
-            tiles_handle.black.clone()
         }
     }
 }
