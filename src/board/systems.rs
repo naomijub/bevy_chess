@@ -1,8 +1,11 @@
 use bevy::prelude::*;
 
-use crate::pieces::{
-    components::{Piece, PieceType, Selected},
-    helper::Contains,
+use crate::{
+    pieces::{
+        components::{Piece, PieceType, Selected},
+        helper::Contains,
+    },
+    player::Turn,
 };
 
 use super::{
@@ -17,6 +20,7 @@ pub fn set_selected_piece(
     mut tiles: Query<(Entity, &Square, &mut Handle<StandardMaterial>)>,
     previous_selected: Query<Entity, With<Selected>>,
     tiles_handle: Res<TilesHandles>,
+    turn: Res<Turn>,
 ) {
     let Some(&SelectedEvent(selected_entity)) = events.read().next() else {
         return;
@@ -44,6 +48,10 @@ pub fn set_selected_piece(
     let Some(selected_piece) = pieces.iter().find(|(_, piece)| piece == &square) else {
         return;
     };
+
+    if *turn != selected_piece.1 {
+        return;
+    }
 
     commands.entity(selected_piece.0).insert(Selected {
         color: selected_piece.1.color,

@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
+use components::{PossibleMove, Square};
 use systems::{define_possible_moves, set_selected_piece};
 
 pub mod components;
@@ -24,12 +25,16 @@ impl From<ListenerInput<Pointer<Click>>> for SelectedEvent {
     }
 }
 
-#[derive(Debug, Clone, Reflect, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SelectedEvent>()
+            .register_type::<TilesHandles>()
+            .register_type::<SelectedEvent>()
+            .register_type::<Square>()
+            .register_type::<PossibleMove>()
             .add_systems(Startup, setup::board)
             .add_systems(
                 Update,

@@ -8,7 +8,9 @@ use bevy::{
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use bevy_mod_picking::DefaultPickingPlugins;
-use chess::{board::BoardPlugin, debugger::DebuggerPlugin, pieces::PiecesPlugin, setup};
+use chess::{
+    board::BoardPlugin, debugger::DebuggerPlugin, pieces::PiecesPlugin, player::PlayerPlugin, setup,
+};
 
 fn main() {
     App::new()
@@ -43,6 +45,7 @@ fn main() {
             ),
         ))
         .add_plugins((
+            PlayerPlugin,
             DefaultPickingPlugins,
             DebuggerPlugin,
             BoardPlugin,
