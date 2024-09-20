@@ -34,3 +34,41 @@ impl Add<(i8, i8)> for Square {
         }
     }
 }
+
+impl Add<(u8, u8)> for Square {
+    type Output = Self;
+
+    fn add(self, rhs: (u8, u8)) -> Self::Output {
+        Self {
+            x: self.x + rhs.0 as i8,
+            y: self.y + rhs.1 as i8,
+        }
+    }
+}
+
+impl From<(u8, u8)> for Square {
+    fn from((x, y): (u8, u8)) -> Self {
+        Self {
+            x: x as i8,
+            y: y as i8,
+        }
+    }
+}
+
+impl From<(i8, i8)> for Square {
+    fn from((x, y): (i8, i8)) -> Self {
+        Self { x, y }
+    }
+}
+
+impl From<Square> for (u8, u8) {
+    fn from(square: Square) -> Self {
+        (square.x as u8, square.y as u8)
+    }
+}
+
+impl From<&Square> for (u8, u8) {
+    fn from(square: &Square) -> Self {
+        (square.x as u8, square.y as u8)
+    }
+}

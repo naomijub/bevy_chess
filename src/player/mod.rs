@@ -7,8 +7,16 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<Turn>().register_type::<Turn>();
+        app.init_resource::<Turn>()
+            .register_type::<Turn>()
+            .init_resource::<SelectedPlayerPiece>()
+            .register_type::<SelectedPlayerPiece>();
     }
+}
+
+#[derive(Default, Debug, Clone, Reflect, Resource)]
+pub struct SelectedPlayerPiece {
+    pub entity: Option<Entity>,
 }
 
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Reflect, Resource)]

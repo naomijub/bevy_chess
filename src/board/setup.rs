@@ -56,8 +56,8 @@ pub fn board(
                 },
                 Square { x: i, y: j },
                 PickableBundle::default(),
+                On::<Pointer<Down>>::send_event::<SelectedEvent>(),
                 crate::picking::HIGHLIGHT_TINT.clone(),
-                On::<Pointer<Click>>::send_event::<SelectedEvent>(),
             ));
         }
     }
