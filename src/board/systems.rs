@@ -1,28 +1,43 @@
 use bevy::prelude::*;
 
-use crate::{pieces::components::Piece, player::SelectedPlayerPiece};
+use crate::{
+    pieces::components::Piece,
+    player::{SelectedPlayerPiece, Turn},
+};
 
-use super::{components::Square, MoveToEvent, SelectedEvent, SelectedSquare};
+use super::{components::Square, DespawnEvent, MoveToEvent, SelectedEvent, SelectedSquare};
 
 pub fn set_move_to_square(
     mut move_to_event: EventReader<MoveToEvent>,
     mut pieces: Query<&mut Piece>,
+    mut turn: ResMut<Turn>,
 ) {
     for event in move_to_event.read() {
         if let Ok(mut piece) = pieces.get_mut(event.entity) {
             piece.x = event.to.0 as u8;
             piece.y = event.to.1 as u8;
+            *turn = piece.color.opposite().into();
         }
     }
     move_to_event.clear();
 }
 
+pub fn despawn_taken(mut despawn_event: EventReader<DespawnEvent>, mut commands: Commands) {
+    if let Some(event) = despawn_event.read().next() {
+        commands.entity(event.0).despawn_recursive();
+    }
+
+    despawn_event.clear();
+}
+
 pub fn set_selections(
     mut events: EventReader<SelectedEvent>,
     mut move_to_event: EventWriter<MoveToEvent>,
+    mut despawn_event: EventWriter<DespawnEvent>,
     mut selected_sq: ResMut<SelectedSquare>,
     mut selected_piece: ResMut<SelectedPlayerPiece>,
     mouse_button_inputs: Res<ButtonInput<MouseButton>>,
+    turn: Res<Turn>,
     pieces: Query<(Entity, &Piece)>,
     tiles: Query<(Entity, &Square)>,
 ) {
@@ -43,13 +58,21 @@ pub fn set_selections(
                         entity: piece_entity,
                         to: (square.x, square.y),
                     });
+
+                    if let Some((entity, _)) = pieces.iter().find(|p| {
+                        p.1.x == square.x as u8
+                            && p.1.y == square.y as u8
+                            && p.1.color != piece.color
+                    }) {
+                        despawn_event.send(DespawnEvent(entity));
+                    }
                 }
             }
             selected_piece.entity = None;
             selected_piece.entity = None;
         } else {
             for (piece_entity, piece) in pieces.iter() {
-                if piece.x == square.x as u8 && piece.y == square.y as u8 {
+                if piece.x == square.x as u8 && piece.y == square.y as u8 && *turn == piece {
                     selected_piece.entity = Some(piece_entity);
                     break;
                 }

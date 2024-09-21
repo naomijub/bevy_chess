@@ -34,3 +34,21 @@ impl PartialEq<&Piece> for Turn {
         )
     }
 }
+
+impl From<PieceColor> for Turn {
+    fn from(color: PieceColor) -> Self {
+        match color {
+            PieceColor::White => Self::White,
+            PieceColor::Black => Self::Black,
+        }
+    }
+}
+
+impl From<Turn> for PieceColor {
+    fn from(color: Turn) -> Self {
+        match color {
+            Turn::White => Self::White,
+            Turn::Black => Self::Black,
+        }
+    }
+}
