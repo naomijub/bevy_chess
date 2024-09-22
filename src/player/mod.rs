@@ -1,4 +1,7 @@
 use bevy::prelude::*;
+use systems::victory_screen;
+
+mod systems;
 
 use crate::pieces::components::{Piece, PieceColor};
 
@@ -10,9 +13,15 @@ impl Plugin for PlayerPlugin {
         app.init_resource::<Turn>()
             .register_type::<Turn>()
             .init_resource::<SelectedPlayerPiece>()
-            .register_type::<SelectedPlayerPiece>();
+            .register_type::<SelectedPlayerPiece>()
+            .add_event::<VictoryEvent>()
+            .register_type::<VictoryEvent>()
+            .add_systems(Update, victory_screen.run_if(on_event::<VictoryEvent>()));
     }
 }
+
+#[derive(Debug, Clone, Reflect, Event)]
+pub struct VictoryEvent(pub PieceColor);
 
 #[derive(Default, Debug, Clone, Reflect, Resource)]
 pub struct SelectedPlayerPiece {
@@ -24,6 +33,7 @@ pub enum Turn {
     #[default]
     White,
     Black,
+    End,
 }
 
 impl PartialEq<&Piece> for Turn {
@@ -49,6 +59,7 @@ impl From<Turn> for PieceColor {
         match color {
             Turn::White => Self::White,
             Turn::Black => Self::Black,
+            Turn::End => Self::White,
         }
     }
 }

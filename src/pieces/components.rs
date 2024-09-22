@@ -54,6 +54,11 @@ impl Piece {
     pub fn name(&self) -> Name {
         Name::new(format!("{:?} {:?}", self.piece_type, self.color))
     }
+
+    pub fn is_king(&self) -> bool {
+        self.piece_type == PieceType::King
+    }
+
     pub fn is_move_valid(
         &self,
         new_position: &Square,

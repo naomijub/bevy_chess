@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     pieces::components::Piece,
-    player::{SelectedPlayerPiece, Turn},
+    player::{SelectedPlayerPiece, Turn, VictoryEvent},
 };
 
 use super::{components::Square, DespawnEvent, MoveToEvent, SelectedEvent, SelectedSquare};
@@ -34,6 +34,7 @@ pub fn set_selections(
     mut events: EventReader<SelectedEvent>,
     mut move_to_event: EventWriter<MoveToEvent>,
     mut despawn_event: EventWriter<DespawnEvent>,
+    mut victory_event: EventWriter<VictoryEvent>,
     mut selected_sq: ResMut<SelectedSquare>,
     mut selected_piece: ResMut<SelectedPlayerPiece>,
     mouse_button_inputs: Res<ButtonInput<MouseButton>>,
@@ -59,11 +60,14 @@ pub fn set_selections(
                         to: (square.x, square.y),
                     });
 
-                    if let Some((entity, _)) = pieces.iter().find(|p| {
+                    if let Some((entity, other_piece)) = pieces.iter().find(|p| {
                         p.1.x == square.x as u8
                             && p.1.y == square.y as u8
                             && p.1.color != piece.color
                     }) {
+                        if other_piece.is_king() {
+                            victory_event.send(VictoryEvent(piece.color));
+                        }
                         despawn_event.send(DespawnEvent(entity));
                     }
                 }
