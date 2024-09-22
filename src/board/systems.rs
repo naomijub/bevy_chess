@@ -1,114 +1,91 @@
 use bevy::prelude::*;
 
 use crate::{
-    pieces::{
-        components::{Piece, PieceType, Selected},
-        helper::Contains,
-    },
-    player::Turn,
+    pieces::components::Piece,
+    player::{SelectedPlayerPiece, Turn, VictoryEvent},
 };
 
-use super::{
-    components::{PossibleMove, Square},
-    SelectedEvent, TilesHandles,
-};
+use super::{components::Square, DespawnEvent, MoveToEvent, SelectedEvent, SelectedSquare};
 
-pub fn set_selected_piece(
-    mut events: EventReader<SelectedEvent>,
-    mut commands: Commands,
-    pieces: Query<(Entity, &Piece)>,
-    mut tiles: Query<(Entity, &Square, &mut Handle<StandardMaterial>)>,
-    previous_selected: Query<Entity, With<Selected>>,
-    tiles_handle: Res<TilesHandles>,
-    turn: Res<Turn>,
+pub fn set_move_to_square(
+    mut move_to_event: EventReader<MoveToEvent>,
+    mut pieces: Query<&mut Piece>,
+    mut turn: ResMut<Turn>,
 ) {
-    let Some(&SelectedEvent(selected_entity)) = events.read().next() else {
-        return;
-    };
-
-    previous_selected.iter().for_each(|entity| {
-        commands.entity(entity).remove::<Selected>();
-    });
-
-    for (entity, tile, mut material) in tiles.iter_mut() {
-        if entity == selected_entity {
-            continue;
-        }
-        *material = if tile.is_white() {
-            tiles_handle.white.clone()
-        } else {
-            tiles_handle.black.clone()
+    for event in move_to_event.read() {
+        if let Ok(mut piece) = pieces.get_mut(event.entity) {
+            piece.x = event.to.0 as u8;
+            piece.y = event.to.1 as u8;
+            *turn = piece.color.opposite().into();
         }
     }
-
-    let Ok((selected_tile, square, _)) = tiles.get(selected_entity) else {
-        return;
-    };
-
-    let Some(selected_piece) = pieces.iter().find(|(_, piece)| piece == &square) else {
-        return;
-    };
-
-    if *turn != selected_piece.1 {
-        return;
-    }
-
-    commands.entity(selected_piece.0).insert(Selected {
-        color: selected_piece.1.color,
-        piece_type: selected_piece.1.piece_type,
-    });
-    commands.entity(selected_tile).insert(Selected {
-        color: selected_piece.1.color,
-        piece_type: selected_piece.1.piece_type,
-    });
+    move_to_event.clear();
 }
 
-pub fn define_possible_moves(
-    mut commands: Commands,
-    mut tiles: Query<(Entity, &Square, &mut Handle<StandardMaterial>)>,
-    board_pieces: Query<(Entity, &Piece)>,
-    selected_pieces: Query<(Entity, &Square, &Selected)>,
-    previous_possible_moves: Query<Entity, With<PossibleMove>>,
-    tiles_handle: Res<TilesHandles>,
+pub fn despawn_taken(mut despawn_event: EventReader<DespawnEvent>, mut commands: Commands) {
+    if let Some(event) = despawn_event.read().next() {
+        commands.entity(event.0).despawn_recursive();
+    }
+
+    despawn_event.clear();
+}
+
+pub fn set_selections(
+    mut events: EventReader<SelectedEvent>,
+    mut move_to_event: EventWriter<MoveToEvent>,
+    mut despawn_event: EventWriter<DespawnEvent>,
+    mut victory_event: EventWriter<VictoryEvent>,
+    mut selected_sq: ResMut<SelectedSquare>,
+    mut selected_piece: ResMut<SelectedPlayerPiece>,
+    mouse_button_inputs: Res<ButtonInput<MouseButton>>,
+    turn: Res<Turn>,
+    pieces: Query<(Entity, &Piece)>,
+    tiles: Query<(Entity, &Square)>,
 ) {
-    let Ok((selected_entity, square, selected)) = selected_pieces.get_single() else {
+    if !mouse_button_inputs.just_pressed(MouseButton::Left) {
         return;
-    };
+    }
 
-    let can_pawn = board_pieces
-        .iter()
-        .filter(|(_, piece)| piece.piece_type == PieceType::Pawn)
-        .find(|(_, piece)| piece == &square)
-        .map(|(_, piece)| piece);
+    if let Some(&SelectedEvent(selected_sq_entity)) = events.read().next() {
+        selected_sq.entity = Some(selected_sq_entity);
+        let Ok((_, square)) = tiles.get(selected_sq_entity) else {
+            return;
+        };
 
-    let possible_moves = crate::pieces::helper::possible_moves(
-        selected.piece_type,
-        selected.color,
-        square,
-        can_pawn.map(|piece| piece.first_move).unwrap_or_default(),
-    );
+        if let Some(selected_piece_entity) = selected_piece.entity {
+            if let Ok((piece_entity, piece)) = pieces.get(selected_piece_entity) {
+                if piece.is_move_valid(square, &pieces) {
+                    move_to_event.send(MoveToEvent {
+                        entity: piece_entity,
+                        to: (square.x, square.y),
+                    });
 
-    previous_possible_moves.iter().for_each(|entity| {
-        commands.entity(entity).remove::<PossibleMove>();
-    });
-
-    for (entity, tile, mut material) in tiles.iter_mut() {
-        if entity == selected_entity {
-            continue;
-        }
-        if possible_moves.contains(tile) {
-            if board_pieces.contains_color(tile, &selected.color.opposite()) {
-                commands.entity(entity).insert(PossibleMove::Enemy);
-                *material = tiles_handle.enemy_piece.clone();
-            } else if board_pieces.contains_color(tile, &selected.color) {
-                continue;
-            } else {
-                if can_pawn.is_some() && !possible_moves[2..].contains(tile) {
-                    continue;
+                    if let Some((entity, other_piece)) = pieces.iter().find(|p| {
+                        p.1.x == square.x as u8
+                            && p.1.y == square.y as u8
+                            && p.1.color != piece.color
+                    }) {
+                        if other_piece.is_king() {
+                            victory_event.send(VictoryEvent(piece.color));
+                        }
+                        despawn_event.send(DespawnEvent(entity));
+                    }
                 }
-                commands.entity(entity).insert(PossibleMove::Empty);
-                *material = tiles_handle.possible_move.clone();
+            }
+            selected_piece.entity = None;
+            selected_piece.entity = None;
+        } else {
+            for (piece_entity, piece) in pieces.iter() {
+                if piece.x == square.x as u8 && piece.y == square.y as u8 && *turn == piece {
+                    selected_piece.entity = Some(piece_entity);
+                    break;
+                }
             }
         }
+    } else {
+        selected_sq.entity = None;
+        selected_piece.entity = None;
     }
+
+    events.clear();
 }

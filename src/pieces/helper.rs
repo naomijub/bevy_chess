@@ -90,18 +90,67 @@ pub fn possible_moves(
 }
 
 pub trait Contains {
-    fn contains_any(&self, square: &Square) -> bool;
-    fn contains_color(&self, square: &Square, color: &PieceColor) -> bool;
+    fn color_of(&self, square: &Square) -> Option<PieceColor>;
 }
 
 impl<'w, 's> Contains for Query<'w, 's, (Entity, &Piece)> {
-    fn contains_any(&self, square: &Square) -> bool {
-        self.iter().any(|(_, piece)| piece == square)
+    fn color_of(&self, square: &Square) -> Option<PieceColor> {
+        self.iter().find(|p| p.1 == square).map(|p| p.1.color)
+    }
+}
+
+pub fn is_path_empty(
+    begin: &Square,
+    end: &Square,
+    pieces: &Query<'_, '_, (Entity, &Piece)>,
+) -> bool {
+    // Same column
+    if begin.x == end.x
+        && pieces.iter().any(|(_, piece)| {
+            piece.x as i16 == begin.x as i16
+                && ((piece.y as i16 > begin.y as i16 && (piece.y as i16) < (end.y as i16))
+                    || (piece.y as i16 > end.y as i16 && (piece.y as i16) < (begin.y as i16)))
+        })
+    {
+        return false;
     }
 
-    fn contains_color(&self, square: &Square, color: &PieceColor) -> bool {
-        self.iter()
-            .filter(|(_, piece)| piece.color == *color)
-            .any(|(_, piece)| piece == square)
+    // Same row
+    if begin.y == end.y
+        && pieces.iter().any(|(_, piece)| {
+            piece.y as i16 == begin.y as i16
+                && ((piece.x as i16 > begin.x as i16 && (piece.x as i16) < (end.x as i16))
+                    || (piece.x as i16 > end.x as i16 && (piece.x as i16) < (begin.x as i16)))
+        })
+    {
+        return false;
     }
+
+    // Diagonals
+    let x_diff = (begin.x - end.x).abs();
+    let y_diff = (begin.y - end.y).abs();
+    if x_diff == y_diff {
+        for i in 1..x_diff {
+            let pos = if begin.x < end.x && begin.y < end.y {
+                // left bottom - right top
+                (begin.x + i, begin.y + i)
+            } else if begin.x < end.x && begin.y > end.y {
+                // left top - right bottom
+                (begin.x + i, begin.y - i)
+            } else if begin.x > end.x && begin.y < end.y {
+                // right bottom - left top
+                (begin.x - i, begin.y + i)
+            } else {
+                // begin.x > end.x && begin.y > end.y
+                // right top - left bottom
+                (begin.x - i, begin.y - i)
+            };
+
+            if pieces.color_of(&pos.into()).is_some() {
+                return false;
+            }
+        }
+    }
+
+    true
 }
