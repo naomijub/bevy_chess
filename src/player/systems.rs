@@ -1,7 +1,7 @@
 use crate::pieces::components::PieceColor;
 use bevy::{color::palettes::css::GOLD, prelude::*};
 
-use super::{Turn, VictoryEvent};
+use super::{setup::TurnText, Turn, VictoryEvent};
 
 pub fn victory_screen(
     mut events: EventReader<VictoryEvent>,
@@ -38,4 +38,20 @@ pub fn victory_screen(
     );
 
     *turn = Turn::End;
+}
+
+pub fn text_update_system(
+    turn: Res<Turn>,
+    mut query: Query<&mut Text, With<TurnText>>,
+    mut turns_count: Local<u32>,
+) {
+    if !turn.is_changed() {
+        return;
+    }
+    let next_turn = *turn;
+    for mut text in &mut query {
+        text.sections[1].value = format!("{next_turn}. Turns: {}", *turns_count);
+    }
+
+    *turns_count += 1;
 }

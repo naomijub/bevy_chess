@@ -33,8 +33,8 @@ pub fn despawn_taken(mut despawn_event: EventReader<DespawnEvent>, mut commands:
 pub fn set_selections(
     mut events: EventReader<SelectedEvent>,
     mut move_to_event: EventWriter<MoveToEvent>,
-    mut despawn_event: EventWriter<DespawnEvent>,
-    mut victory_event: EventWriter<VictoryEvent>,
+    despawn_event: EventWriter<DespawnEvent>,
+    victory_event: EventWriter<VictoryEvent>,
     mut selected_sq: ResMut<SelectedSquare>,
     mut selected_piece: ResMut<SelectedPlayerPiece>,
     mouse_button_inputs: Res<ButtonInput<MouseButton>>,
@@ -60,16 +60,7 @@ pub fn set_selections(
                         to: (square.x, square.y),
                     });
 
-                    if let Some((entity, other_piece)) = pieces.iter().find(|p| {
-                        p.1.x == square.x as u8
-                            && p.1.y == square.y as u8
-                            && p.1.color != piece.color
-                    }) {
-                        if other_piece.is_king() {
-                            victory_event.send(VictoryEvent(piece.color));
-                        }
-                        despawn_event.send(DespawnEvent(entity));
-                    }
+                    kill_piece(&pieces, square, piece, victory_event, despawn_event);
                 }
             }
             selected_piece.entity = None;
@@ -88,4 +79,22 @@ pub fn set_selections(
     }
 
     events.clear();
+}
+
+fn kill_piece(
+    pieces: &Query<'_, '_, (Entity, &Piece)>,
+    square: &Square,
+    piece: &Piece,
+    mut victory_event: EventWriter<'_, VictoryEvent>,
+    mut despawn_event: EventWriter<'_, DespawnEvent>,
+) {
+    if let Some((entity, other_piece)) = pieces
+        .iter()
+        .find(|p| p.1.x == square.x as u8 && p.1.y == square.y as u8 && p.1.color != piece.color)
+    {
+        if other_piece.is_king() {
+            victory_event.send(VictoryEvent(piece.color));
+        }
+        despawn_event.send(DespawnEvent(entity));
+    }
 }

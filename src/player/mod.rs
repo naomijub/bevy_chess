@@ -1,6 +1,8 @@
 use bevy::prelude::*;
-use systems::victory_screen;
+use setup::add_turn_text;
+use systems::{text_update_system, victory_screen};
 
+mod setup;
 mod systems;
 
 use crate::pieces::components::{Piece, PieceColor};
@@ -16,7 +18,14 @@ impl Plugin for PlayerPlugin {
             .register_type::<SelectedPlayerPiece>()
             .add_event::<VictoryEvent>()
             .register_type::<VictoryEvent>()
-            .add_systems(Update, victory_screen.run_if(on_event::<VictoryEvent>()));
+            .add_systems(Startup, add_turn_text)
+            .add_systems(
+                Update,
+                (
+                    text_update_system,
+                    victory_screen.run_if(on_event::<VictoryEvent>()),
+                ),
+            );
     }
 }
 
@@ -34,6 +43,16 @@ pub enum Turn {
     White,
     Black,
     End,
+}
+
+impl std::fmt::Display for Turn {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::White => write!(f, "White"),
+            Self::Black => write!(f, "Black"),
+            Self::End => write!(f, "End"),
+        }
+    }
 }
 
 impl PartialEq<&Piece> for Turn {
