@@ -74,7 +74,9 @@ impl Piece {
         }
 
         match self.piece_type {
-            PieceType::King => self.king_moves(new_position),
+            PieceType::King => {
+                self.king_moves(new_position) || self.can_castle(new_position, pieces)
+            }
             PieceType::Queen => self.queen_moves(new_position, pieces),
             PieceType::Bishop => self.bishop_moves(new_position, pieces),
             PieceType::Knight => self.knight_moves(new_position),
@@ -188,5 +190,38 @@ impl Piece {
         // Diagonal
         || ((self.x  - new_position.x).abs() == 1
             && (self.y  - new_position.y).abs() == 1)
+    }
+
+    const CASTLE_COLUMNS: [(i8, i8); 2] = [(1, 0), (6, 7)];
+    fn can_castle(&self, new_position: &Square, pieces: &Query<'_, '_, (Entity, &Self)>) -> bool {
+        let castle_rook = Self::CASTLE_COLUMNS
+            .iter()
+            .map(|pos| (self.x, pos.0))
+            .find(|pos| pos.0 == new_position.x && pos.1 == new_position.y);
+
+        warn!(
+            "can_castle: {:?}, new_position: {:?}",
+            castle_rook, new_position
+        );
+        if self.first_move && castle_rook.is_some() {
+            error!("can_castle!");
+
+            let Some((_, rook)) = pieces.iter().find(|(_, piece)| {
+                piece.piece_type == PieceType::Rook && piece.y == castle_rook.unwrap().1
+            }) else {
+                error!("can_castle: rook not found");
+                return false;
+            };
+
+            if rook.first_move {
+                error!("can_castle: rook first move");
+                is_path_empty(&(self.x, self.y).into(), new_position, pieces)
+            } else {
+                false
+            }
+        } else {
+            error!("can_castle: BLEEHH");
+            false
+        }
     }
 }
