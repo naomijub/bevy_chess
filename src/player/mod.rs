@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use setup::add_turn_text;
-use systems::{text_update_system, victory_screen};
+use systems::{draw_possible_moves, text_update_system, victory_screen};
 
 mod setup;
 mod systems;
@@ -23,6 +23,7 @@ impl Plugin for PlayerPlugin {
                 Update,
                 (
                     text_update_system,
+                    draw_possible_moves,
                     victory_screen.run_if(on_event::<VictoryEvent>()),
                 ),
             );

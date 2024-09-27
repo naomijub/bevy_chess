@@ -107,9 +107,9 @@ pub fn is_path_empty(
     // Same column
     if begin.x == end.x
         && pieces.iter().any(|(_, piece)| {
-            piece.x as i16 == begin.x as i16
-                && ((piece.y as i16 > begin.y as i16 && (piece.y as i16) < (end.y as i16))
-                    || (piece.y as i16 > end.y as i16 && (piece.y as i16) < (begin.y as i16)))
+            piece.x == begin.x
+                && ((piece.y > begin.y && piece.y < end.y)
+                    || (piece.y > end.y && piece.y < begin.y))
         })
     {
         return false;
@@ -118,9 +118,9 @@ pub fn is_path_empty(
     // Same row
     if begin.y == end.y
         && pieces.iter().any(|(_, piece)| {
-            piece.y as i16 == begin.y as i16
-                && ((piece.x as i16 > begin.x as i16 && (piece.x as i16) < (end.x as i16))
-                    || (piece.x as i16 > end.x as i16 && (piece.x as i16) < (begin.x as i16)))
+            piece.y == begin.y
+                && ((piece.x > begin.x && piece.x < end.x)
+                    || (piece.x > end.x && piece.x < begin.x))
         })
     {
         return false;

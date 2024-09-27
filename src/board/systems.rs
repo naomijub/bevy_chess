@@ -14,8 +14,8 @@ pub fn set_move_to_square(
 ) {
     for event in move_to_event.read() {
         if let Ok(mut piece) = pieces.get_mut(event.entity) {
-            piece.x = event.to.0 as u8;
-            piece.y = event.to.1 as u8;
+            piece.x = event.to.0;
+            piece.y = event.to.1;
             *turn = piece.color.opposite().into();
         }
     }
@@ -67,7 +67,7 @@ pub fn set_selections(
             selected_piece.entity = None;
         } else {
             for (piece_entity, piece) in pieces.iter() {
-                if piece.x == square.x as u8 && piece.y == square.y as u8 && *turn == piece {
+                if piece.x == square.x && piece.y == square.y && *turn == piece {
                     selected_piece.entity = Some(piece_entity);
                     break;
                 }
@@ -90,7 +90,7 @@ fn kill_piece(
 ) {
     if let Some((entity, other_piece)) = pieces
         .iter()
-        .find(|p| p.1.x == square.x as u8 && p.1.y == square.y as u8 && p.1.color != piece.color)
+        .find(|p| p.1.x == square.x && p.1.y == square.y && p.1.color != piece.color)
     {
         if other_piece.is_king() {
             victory_event.send(VictoryEvent(piece.color));

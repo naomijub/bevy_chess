@@ -105,7 +105,7 @@ pub fn spawn_pieces(
             white_material.clone(),
             PieceColor::White,
             pawn_handle.clone(),
-            (1, i as u8),
+            (1, i as i8),
         );
     }
 
@@ -175,7 +175,7 @@ pub fn spawn_pieces(
             black_material.clone(),
             PieceColor::Black,
             pawn_handle.clone(),
-            (6, i as u8),
+            (6, i as i8),
         );
     }
 }
@@ -186,7 +186,7 @@ fn spawn_king(
     piece_color: PieceColor,
     mesh: Handle<Mesh>,
     mesh_cross: Handle<Mesh>,
-    position: (u8, u8),
+    position: (i8, i8),
 ) {
     commands
         // Spawn parent entity
@@ -245,7 +245,7 @@ fn spawn_knight(
     piece_color: PieceColor,
     mesh_1: Handle<Mesh>,
     mesh_2: Handle<Mesh>,
-    position: (u8, u8),
+    position: (i8, i8),
 ) {
     commands
         // Spawn parent entity
@@ -303,7 +303,7 @@ fn spawn_queen(
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
     mesh: Handle<Mesh>,
-    position: (u8, u8),
+    position: (i8, i8),
 ) {
     commands
         .spawn((
@@ -346,7 +346,7 @@ fn spawn_bishop(
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
     mesh: Handle<Mesh>,
-    position: (u8, u8),
+    position: (i8, i8),
 ) {
     commands
         .spawn((
@@ -389,7 +389,7 @@ fn spawn_rook(
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
     mesh: Handle<Mesh>,
-    position: (u8, u8),
+    position: (i8, i8),
 ) {
     commands
         .spawn((
@@ -432,7 +432,7 @@ fn spawn_pawn(
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
     mesh: Handle<Mesh>,
-    position: (u8, u8),
+    position: (i8, i8),
 ) {
     commands
         .spawn((

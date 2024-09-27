@@ -4,14 +4,11 @@ use bevy::prelude::*;
 pub struct TurnText;
 
 pub fn add_turn_text(mut commands: Commands) {
-    // Text with multiple sections
     commands.spawn((
-        // Create a TextBundle that has a Text with a list of sections.
         TextBundle::from_sections([
             TextSection::new(
                 "Player: ",
                 TextStyle {
-                    // This font is loaded and will be used instead of the default font.
                     font_size: 32.0,
                     ..default()
                 },

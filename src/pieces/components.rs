@@ -30,8 +30,8 @@ pub enum PieceType {
 pub struct Piece {
     pub color: PieceColor,
     pub piece_type: PieceType,
-    pub x: u8,
-    pub y: u8,
+    pub x: i8,
+    pub y: i8,
     pub first_move: bool,
 }
 
@@ -51,6 +51,10 @@ impl PieceColor {
 }
 
 impl Piece {
+    pub const fn is_diagonal(&self, square: &Square) -> bool {
+        (self.x - square.x).abs() == (self.y - square.y).abs()
+    }
+
     pub fn name(&self) -> Name {
         Name::new(format!("{:?} {:?}", self.piece_type, self.color))
     }
@@ -71,7 +75,7 @@ impl Piece {
 
         match self.piece_type {
             PieceType::King => self.king_moves(new_position),
-            PieceType::Queen => self.queent_moves(new_position, pieces),
+            PieceType::Queen => self.queen_moves(new_position, pieces),
             PieceType::Bishop => self.bishop_moves(new_position, pieces),
             PieceType::Knight => self.knight_moves(new_position),
             PieceType::Rook => self.rook_moves(new_position, pieces),
@@ -91,8 +95,8 @@ impl Piece {
         pieces: &Query<'_, '_, (Entity, &Self)>,
     ) -> bool {
         // Normal move
-        if new_position.x - self.x as i8 == -1
-            && (self.y == new_position.y as u8)
+        if new_position.x - self.x == -1
+            && (self.y == new_position.y)
             && pieces.color_of(new_position).is_none()
         {
             return true;
@@ -100,8 +104,8 @@ impl Piece {
 
         // Move 2 squares for first move
         if self.first_move
-            && new_position.x - self.x as i8 == -2
-            && (self.y == new_position.y as u8)
+            && new_position.x - self.x == -2
+            && (self.y == new_position.y)
             && is_path_empty(&(self.x, self.y).into(), new_position, pieces)
             && pieces.color_of(new_position).is_none()
         {
@@ -109,8 +113,8 @@ impl Piece {
         }
 
         // Take piece
-        if new_position.x - self.x as i8 == -1
-            && (self.y as i8 - new_position.y).abs() == 1
+        if new_position.x - self.x == -1
+            && (self.y - new_position.y).abs() == 1
             && pieces.color_of(new_position) == Some(PieceColor::White)
         {
             return true;
@@ -124,8 +128,8 @@ impl Piece {
         pieces: &Query<'_, '_, (Entity, &Self)>,
     ) -> bool {
         // Normal move
-        if new_position.x as u8 - self.x == 1
-            && (self.y == new_position.y as u8)
+        if new_position.x - self.x == 1
+            && (self.y == new_position.y)
             && pieces.color_of(new_position).is_none()
         {
             return true;
@@ -133,8 +137,8 @@ impl Piece {
 
         // Move 2 squares for first move
         if self.first_move
-            && new_position.x - self.x as i8 == 2
-            && (self.y == new_position.y as u8)
+            && new_position.x - self.x == 2
+            && (self.y == new_position.y)
             && is_path_empty(&(self.x, self.y).into(), new_position, pieces)
             && pieces.color_of(new_position).is_none()
         {
@@ -142,8 +146,8 @@ impl Piece {
         }
 
         // Take piece
-        if new_position.x - self.x as i8 == 1
-            && (self.y as i8 - new_position.y).abs() == 1
+        if new_position.x - self.x == 1
+            && (self.y - new_position.y).abs() == 1
             && pieces.color_of(new_position) == Some(PieceColor::Black)
         {
             return true;
@@ -153,37 +157,36 @@ impl Piece {
 
     fn rook_moves(&self, new_position: &Square, pieces: &Query<'_, '_, (Entity, &Self)>) -> bool {
         is_path_empty(&(self.x, self.y).into(), new_position, pieces)
-            && ((self.x == new_position.x as u8 && self.y != new_position.y as u8)
-                || (self.y == new_position.y as u8 && self.x != new_position.x as u8))
+            && ((self.x == new_position.x && self.y != new_position.y)
+                || (self.y == new_position.y && self.x != new_position.x))
     }
 
     const fn knight_moves(&self, new_position: &Square) -> bool {
-        ((self.x as i8 - new_position.x).abs() == 2 && (self.y as i8 - new_position.y).abs() == 1)
-            || ((self.x as i8 - new_position.x).abs() == 1
-                && (self.y as i8 - new_position.y).abs() == 2)
+        ((self.x - new_position.x).abs() == 2 && (self.y - new_position.y).abs() == 1)
+            || ((self.x - new_position.x).abs() == 1 && (self.y - new_position.y).abs() == 2)
     }
 
     fn bishop_moves(&self, new_position: &Square, pieces: &Query<'_, '_, (Entity, &Self)>) -> bool {
         is_path_empty(&(self.x, self.y).into(), new_position, pieces)
-            && (self.x as i8 - new_position.x).abs() == (self.y as i8 - new_position.y).abs()
+            && (self.x - new_position.x).abs() == (self.y - new_position.y).abs()
     }
 
-    fn queent_moves(&self, new_position: &Square, pieces: &Query<'_, '_, (Entity, &Self)>) -> bool {
+    fn queen_moves(&self, new_position: &Square, pieces: &Query<'_, '_, (Entity, &Self)>) -> bool {
         is_path_empty(&(self.x, self.y).into(), new_position, pieces)
-            && ((self.x as i8 - new_position.x).abs() == (self.y as i8 - new_position.y).abs()
-                || ((self.x == new_position.x as u8 && self.y != new_position.y as u8)
-                    || (self.y == new_position.y as u8 && self.x != new_position.x as u8)))
+            && ((self.x - new_position.x).abs() == (self.y - new_position.y).abs()
+                || ((self.x == new_position.x && self.y != new_position.y)
+                    || (self.y == new_position.y && self.x != new_position.x)))
     }
 
     const fn king_moves(&self, new_position: &Square) -> bool {
         // Horizontal
-        ((self.x as i8 - new_position.x).abs() == 1
-        && (self.y == new_position.y as u8))
+        ((self.x  - new_position.x).abs() == 1
+        && (self.y == new_position.y ))
         // Vertical
-        || ((self.y as i8 - new_position.y).abs() == 1
-            && (self.x == new_position.x as u8))
+        || ((self.y  - new_position.y).abs() == 1
+            && (self.x == new_position.x ))
         // Diagonal
-        || ((self.x as i8 - new_position.x).abs() == 1
-            && (self.y as i8 - new_position.y).abs() == 1)
+        || ((self.x  - new_position.x).abs() == 1
+            && (self.y  - new_position.y).abs() == 1)
     }
 }
