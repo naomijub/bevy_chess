@@ -206,7 +206,9 @@ impl Piece {
         if self.first_move && castle_rook.is_some() {
             let Some((rook_entity, rook)) = pieces
                 .iter()
-                .filter(|(_, piece)| piece.piece_type == PieceType::Rook)
+                .filter(|(_, piece)| {
+                    piece.piece_type == PieceType::Rook && piece.color == self.color
+                })
                 .find(|(_, piece)| piece.y == castle_rook.unwrap().1)
             else {
                 return (false, None);
