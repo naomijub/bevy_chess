@@ -17,6 +17,7 @@ pub fn set_move_to_square(
             piece.x = event.to.0;
             piece.y = event.to.1;
             *turn = piece.color.opposite().into();
+            piece.first_move = false;
         }
     }
     move_to_event.clear();
@@ -54,11 +55,18 @@ pub fn set_selections(
 
         if let Some(selected_piece_entity) = selected_piece.entity {
             if let Ok((piece_entity, piece)) = pieces.get(selected_piece_entity) {
-                if piece.is_move_valid(square, &pieces) {
+                let valid_move = piece.is_move_valid(square, &pieces);
+                if valid_move.0 {
                     move_to_event.send(MoveToEvent {
                         entity: piece_entity,
                         to: (square.x, square.y),
                     });
+                    if let Some((entity, column)) = valid_move.1 {
+                        move_to_event.send(MoveToEvent {
+                            entity,
+                            to: (square.x, column),
+                        });
+                    }
 
                     kill_piece(&pieces, square, piece, victory_event, despawn_event);
                 }

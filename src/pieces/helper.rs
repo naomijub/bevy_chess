@@ -18,7 +18,7 @@ const ROOK_OFFSETS: [(i8, i8); 4] = [(1, 0), (-1, 0), (0, 1), (0, -1)];
 
 const BISHOP_OFFSETS: [(i8, i8); 4] = [(1, 1), (-1, 1), (1, -1), (-1, -1)];
 
-const KING_OFFSETS: [(i8, i8); 8] = [
+const KING_OFFSETS: [(i8, i8); 10] = [
     (1, 1),
     (-1, 1),
     (1, -1),
@@ -27,6 +27,8 @@ const KING_OFFSETS: [(i8, i8); 8] = [
     (-1, 0),
     (0, 1),
     (0, -1),
+    (0, 2),
+    (0, -3),
 ];
 
 const WHITE_PAWN_OFFSETS: [(i8, i8); 4] = [(1, 1), (1, -1), (1, 0), (2, 0)];
@@ -36,19 +38,18 @@ pub fn possible_moves(
     piece: PieceType,
     color: PieceColor,
     square: &Square,
-    is_pawn_first_move: bool,
+    is_first_move: bool,
 ) -> Vec<Square> {
-    let take_count = if is_pawn_first_move { 4 } else { 3 };
     match (piece, color) {
         (PieceType::Pawn, PieceColor::White) => WHITE_PAWN_OFFSETS
             .into_iter()
-            .take(take_count)
+            .take(if is_first_move { 4 } else { 3 })
             .map(|offset| square.clone() + offset)
             .filter(|square| square.inside_board())
             .collect(),
         (PieceType::Pawn, PieceColor::Black) => BLACK_PAWN_OFFSETS
             .into_iter()
-            .take(take_count)
+            .take(if is_first_move { 4 } else { 3 })
             .map(|offset| square.clone() + offset)
             .filter(|square| square.inside_board())
             .collect(),
@@ -59,6 +60,7 @@ pub fn possible_moves(
             .collect(),
         (PieceType::King, _) => KING_OFFSETS
             .into_iter()
+            .take(if is_first_move { 10 } else { 8 })
             .map(|offset| square.clone() + offset)
             .filter(|square| square.inside_board())
             .collect(),

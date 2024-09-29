@@ -28,8 +28,7 @@ struct SelectedSquare {
 pub struct TilesHandles {
     pub white: Handle<StandardMaterial>,
     pub black: Handle<StandardMaterial>,
-    pub possible_move: Handle<StandardMaterial>,
-    pub enemy_piece: Handle<StandardMaterial>,
+
     pub mesh: Handle<Mesh>,
 }
 
