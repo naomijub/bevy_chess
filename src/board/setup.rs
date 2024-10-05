@@ -12,7 +12,7 @@ pub fn board(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Add meshes and materials
-    let mesh = meshes.add(Mesh::from(Plane3d::default().mesh().size(0.98, 0.98)));
+    let mesh = meshes.add(Mesh::from(Cuboid::from_size(Vec3::new(0.98, 0.3, 0.98))));
     let white_material = materials.add(Color::from(SANDY_BROWN));
     let black_material = materials.add(Color::from(SADDLE_BROWN));
 
@@ -44,7 +44,7 @@ pub fn board(
                     } else {
                         black_material.clone()
                     },
-                    transform: Transform::from_translation(Vec3::new(x as f32, 0., y as f32)),
+                    transform: Transform::from_translation(Vec3::new(x as f32, -0.15, y as f32)),
                     ..Default::default()
                 },
                 Square { x, y },

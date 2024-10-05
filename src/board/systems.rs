@@ -61,6 +61,7 @@ pub fn set_selections(
                         entity: piece_entity,
                         to: (square.x, square.y),
                     });
+                    // Rook castle move
                     if let Some((entity, column)) = valid_move.1 {
                         move_to_event.send(MoveToEvent {
                             entity,
