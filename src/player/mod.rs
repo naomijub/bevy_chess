@@ -5,7 +5,7 @@ use systems::{draw_possible_moves, text_update_system, victory_screen};
 mod setup;
 mod systems;
 
-use crate::pieces::components::{Piece, PieceColor};
+use crate::pieces::components::{Piece, PieceColor, PieceType};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PlayerPlugin;
@@ -81,5 +81,32 @@ impl From<Turn> for PieceColor {
             Turn::Black => Self::Black,
             Turn::End => Self::White,
         }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect)]
+pub enum MoveType {
+    SimpleMove,
+    Capture(PieceType),
+    EnPassant,
+    CastlingRight,
+    CastlingLeft,
+    Promotion(PieceType),
+}
+
+impl std::fmt::Display for MoveType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::SimpleMove => String::new(),
+                Self::Capture(piece) => format!("Capture: {}", piece),
+                Self::EnPassant => "EnPassant".to_string(),
+                Self::CastlingRight => "Short Castle".to_string(),
+                Self::CastlingLeft => "Long Castle".to_string(),
+                Self::Promotion(piece) => format!("Promotion to: {}", piece),
+            }
+        )
     }
 }

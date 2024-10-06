@@ -5,3 +5,4 @@ pub mod picking;
 pub mod pieces;
 pub mod player;
 pub mod setup;
+pub mod ui;

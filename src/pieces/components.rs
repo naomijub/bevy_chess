@@ -16,6 +16,19 @@ pub enum PieceColor {
     Black,
 }
 
+impl std::fmt::Display for PieceColor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::White => "White",
+                Self::Black => "Black",
+            }
+        )
+    }
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect)]
 pub enum PieceType {
     King,
@@ -24,6 +37,23 @@ pub enum PieceType {
     Knight,
     Rook,
     Pawn,
+}
+
+impl std::fmt::Display for PieceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::King => "King",
+                Self::Queen => "Queen",
+                Self::Bishop => "Bishop",
+                Self::Knight => "Knight",
+                Self::Rook => "Rook",
+                Self::Pawn => "Pawn",
+            }
+        )
+    }
 }
 
 #[derive(Debug, Clone, Component, Eq, PartialEq, Reflect)]
