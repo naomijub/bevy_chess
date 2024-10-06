@@ -3,6 +3,8 @@ use bevy_mod_picking::prelude::*;
 use components::{PossibleMove, Square};
 use systems::{despawn_taken, set_move_to_square, set_selections};
 
+use crate::ui::models::PlayerMove;
+
 pub mod components;
 mod setup;
 mod systems;
@@ -11,6 +13,11 @@ mod systems;
 pub struct MoveToEvent {
     entity: Entity,
     to: (i8, i8),
+}
+
+#[derive(Debug, Clone, Event, Reflect)]
+pub struct ActionEvent {
+    pub action: PlayerMove,
 }
 
 #[derive(Debug, Clone, Reflect, Event)]
@@ -46,6 +53,7 @@ impl Plugin for BoardPlugin {
         app.add_event::<SelectedEvent>()
             .add_event::<MoveToEvent>()
             .add_event::<DespawnEvent>()
+            .add_event::<ActionEvent>()
             .init_resource::<SelectedSquare>()
             .register_type::<TilesHandles>()
             .register_type::<SelectedEvent>()

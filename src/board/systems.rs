@@ -1,11 +1,14 @@
 use bevy::prelude::*;
 
 use crate::{
-    pieces::components::Piece,
+    pieces::components::{Piece, PieceType},
     player::{SelectedPlayerPiece, Turn, VictoryEvent},
+    ui::models::PlayerMove,
 };
 
-use super::{components::Square, DespawnEvent, MoveToEvent, SelectedEvent, SelectedSquare};
+use super::{
+    components::Square, ActionEvent, DespawnEvent, MoveToEvent, SelectedEvent, SelectedSquare,
+};
 
 pub fn set_move_to_square(
     mut move_to_event: EventReader<MoveToEvent>,
@@ -34,6 +37,7 @@ pub fn despawn_taken(mut despawn_event: EventReader<DespawnEvent>, mut commands:
 pub fn set_selections(
     mut events: EventReader<SelectedEvent>,
     mut move_to_event: EventWriter<MoveToEvent>,
+    mut action_event: EventWriter<ActionEvent>,
     despawn_event: EventWriter<DespawnEvent>,
     victory_event: EventWriter<VictoryEvent>,
     mut selected_sq: ResMut<SelectedSquare>,
@@ -67,9 +71,20 @@ pub fn set_selections(
                             entity,
                             to: (square.x, column),
                         });
+                        action_event.send(ActionEvent {
+                            action: PlayerMove::castle(piece, square.into()),
+                        });
+                    } else if let Some(captured) =
+                        kill_piece(&pieces, square, piece, victory_event, despawn_event)
+                    {
+                        action_event.send(ActionEvent {
+                            action: PlayerMove::capture(piece, square.into(), &captured),
+                        });
+                    } else {
+                        action_event.send(ActionEvent {
+                            action: PlayerMove::simple(piece, square.into()),
+                        });
                     }
-
-                    kill_piece(&pieces, square, piece, victory_event, despawn_event);
                 }
             }
             selected_piece.entity = None;
@@ -96,7 +111,8 @@ fn kill_piece(
     piece: &Piece,
     mut victory_event: EventWriter<'_, VictoryEvent>,
     mut despawn_event: EventWriter<'_, DespawnEvent>,
-) {
+) -> Option<PieceType> {
+    let mut capture = None;
     if let Some((entity, other_piece)) = pieces
         .iter()
         .find(|p| p.1.x == square.x && p.1.y == square.y && p.1.color != piece.color)
@@ -105,5 +121,8 @@ fn kill_piece(
             victory_event.send(VictoryEvent(piece.color));
         }
         despawn_event.send(DespawnEvent(entity));
+        capture = Some(other_piece.piece_type);
     }
+
+    capture
 }

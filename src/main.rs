@@ -9,7 +9,8 @@ use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use bevy_mod_picking::DefaultPickingPlugins;
 use chess::{
-    board::BoardPlugin, debugger::DebuggerPlugin, pieces::PiecesPlugin, player::PlayerPlugin, setup, ui::UiPlugin,
+    board::BoardPlugin, debugger::DebuggerPlugin, pieces::PiecesPlugin, player::PlayerPlugin,
+    setup, ui::UiPlugin,
 };
 
 fn main() {
@@ -21,7 +22,7 @@ fn main() {
                 primary_window: Some(Window {
                     title: "Basic Chess!".into(),
                     name: Some("chess.app".into()),
-                    resolution: (1400., 800.).into(),
+                    resolution: (1300., 800.).into(),
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
                     prevent_default_event_handling: false,

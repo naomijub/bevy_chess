@@ -11,7 +11,7 @@ pub fn ambient(mut commands: Commands) {
             .into(),
             transform: Transform::from_matrix(Mat4::from_rotation_translation(
                 Quat::from_xyzw(-0.3, -0.5, -0.3, 0.5).normalize(),
-                Vec3::new(-7.0, 20.0, 4.0),
+                Vec3::new(-7.0, 20.0, 6.0),
             )),
             ..default()
         },
