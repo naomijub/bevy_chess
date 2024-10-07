@@ -5,6 +5,9 @@ use crate::board::components::Square;
 use super::helper::{is_path_empty, Contains};
 
 #[derive(Debug, Clone, Component, Reflect)]
+pub struct PieceChoiceUI;
+
+#[derive(Debug, Clone, Component, Reflect)]
 pub struct Selected {
     pub color: PieceColor,
     pub piece_type: PieceType,
@@ -29,7 +32,7 @@ impl std::fmt::Display for PieceColor {
     }
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect, Component)]
 pub enum PieceType {
     King,
     Queen,
@@ -91,6 +94,16 @@ impl Piece {
 
     pub fn is_king(&self) -> bool {
         self.piece_type == PieceType::King
+    }
+
+    pub fn can_promote(&self) -> bool {
+        self.piece_type == PieceType::Pawn
+            && self.x
+                == if self.color == PieceColor::White {
+                    7
+                } else {
+                    0
+                }
     }
 
     pub fn is_move_valid(

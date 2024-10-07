@@ -17,9 +17,10 @@ bevy_egui = { version = "0.28", default-features = false, optional = true}
 
 
 [lints.clippy]
-correctness = { level = "deny", priority = -1 }
-suspicious = { level = "deny", priority = 2 }
-style = { level = "deny", priority = 0 }
-complexity = { level = "deny", priority = 3 }
-perf = { level = "deny", priority = 1 }
-nursery = { level = "deny", priority = 4 }
+correctness = { level = "deny", priority = 0 }
+suspicious = { level = "deny", priority = 3 }
+style = { level = "deny", priority = 1 }
+complexity = { level = "deny", priority = 4 }
+perf = { level = "deny", priority = 2 }
+nursery = { level = "deny", priority = 5 }
+type_complexity = { level = "allow", priority = -1 }

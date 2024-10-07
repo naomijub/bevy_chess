@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 
 use crate::{
-    pieces::components::{Piece, PieceType},
+    pieces::{
+        components::{Piece, PieceType},
+        CanPromoteEvent,
+    },
     player::{SelectedPlayerPiece, Turn, VictoryEvent},
     ui::models::PlayerMove,
 };
@@ -12,6 +15,7 @@ use super::{
 
 pub fn set_move_to_square(
     mut move_to_event: EventReader<MoveToEvent>,
+    mut promote_event: EventWriter<CanPromoteEvent>,
     mut pieces: Query<&mut Piece>,
     mut turn: ResMut<Turn>,
 ) {
@@ -21,6 +25,10 @@ pub fn set_move_to_square(
             piece.y = event.to.1;
             *turn = piece.color.opposite().into();
             piece.first_move = false;
+
+            if piece.can_promote() {
+                promote_event.send(CanPromoteEvent(event.entity));
+            }
         }
     }
     move_to_event.clear();
