@@ -1,4 +1,7 @@
-use super::components::{Piece, PieceColor, PieceType};
+use super::{
+    components::{Piece, PieceColor, PieceType},
+    resources::{PieceHandles, Sprites},
+};
 use bevy::{
     color::palettes::css::{BLACK, WHITE},
     prelude::*,
@@ -11,6 +14,23 @@ pub fn add_pieces_name(mut commands: Commands, pieces: Query<(Entity, &Piece)>) 
     for (entity, piece) in pieces.iter() {
         commands.entity(entity).insert(piece.name());
     }
+}
+
+pub fn load_sprites(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
+) {
+    let texture_handle = asset_server.load("sprites/pieces.png");
+    let texture_atlas = TextureAtlasLayout::from_grid(UVec2::new(96, 32), 6, 2, None, None);
+    let texture_atlas_handle: Handle<TextureAtlasLayout> = texture_atlases.add(texture_atlas);
+
+    let image = UiImage::new(texture_handle);
+
+    commands.insert_resource(Sprites {
+        atlas: texture_atlas_handle,
+        image,
+    });
 }
 
 pub fn spawn_pieces(
@@ -38,6 +58,19 @@ pub fn spawn_pieces(
 
     let black_material = materials.add(Color::from(BLACK));
     let white_material = materials.add(Color::from(WHITE));
+
+    commands.insert_resource(PieceHandles {
+        black_material: black_material.clone(),
+        white_material: white_material.clone(),
+        king_handle: king_handle.clone(),
+        king_cross_handle: king_cross_handle.clone(),
+        pawn_handle: pawn_handle.clone(),
+        knight_1_handle: knight_1_handle.clone(),
+        knight_2_handle: knight_2_handle.clone(),
+        rook_handle: rook_handle.clone(),
+        bishop_handle: bishop_handle.clone(),
+        queen_handle: queen_handle.clone(),
+    });
 
     spawn_rook(
         &mut commands,
@@ -180,7 +213,7 @@ pub fn spawn_pieces(
     }
 }
 
-fn spawn_king(
+pub(super) fn spawn_king(
     commands: &mut Commands,
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
@@ -239,7 +272,7 @@ fn spawn_king(
         });
 }
 
-fn spawn_knight(
+pub(super) fn spawn_knight(
     commands: &mut Commands,
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
@@ -298,7 +331,7 @@ fn spawn_knight(
         });
 }
 
-fn spawn_queen(
+pub(super) fn spawn_queen(
     commands: &mut Commands,
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
@@ -341,7 +374,7 @@ fn spawn_queen(
         });
 }
 
-fn spawn_bishop(
+pub(super) fn spawn_bishop(
     commands: &mut Commands,
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
@@ -384,7 +417,7 @@ fn spawn_bishop(
         });
 }
 
-fn spawn_rook(
+pub(super) fn spawn_rook(
     commands: &mut Commands,
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
@@ -427,7 +460,7 @@ fn spawn_rook(
         });
 }
 
-fn spawn_pawn(
+pub(super) fn spawn_pawn(
     commands: &mut Commands,
     material: Handle<StandardMaterial>,
     piece_color: PieceColor,
