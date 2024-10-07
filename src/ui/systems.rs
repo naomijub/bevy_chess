@@ -14,12 +14,15 @@ pub fn update_moves_ui(mut query: Query<(&mut Text, &MovesUI)>, player_moves: Re
     let moves = player_moves
         .moves
         .iter()
+        .enumerate()
         .rev()
         .take(MAX_MOVES_LIMIT)
         .collect::<Vec<_>>();
     for (mut text, MovesUI(index)) in query.iter_mut() {
         if let Some(txt) = text.sections.get_mut(0) {
-            txt.value = moves.get(*index).map_or(String::new(), |m| m.to_string());
+            txt.value = moves
+                .get(*index)
+                .map_or(String::new(), |(i, m)| format!("{}: {m}", i + 1));
         }
     }
 }
