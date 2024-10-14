@@ -62,6 +62,16 @@ impl PlayerMove {
             move_type: MoveType::SimpleMove,
         }
     }
+
+    pub const fn check(piece: &Piece, destination: (i8, i8)) -> Self {
+        Self {
+            color: piece.color,
+            piece: piece.piece_type,
+            origin: (piece.x, piece.y),
+            destination,
+            move_type: MoveType::SimpleCheck,
+        }
+    }
 }
 
 impl std::fmt::Display for PlayerMove {

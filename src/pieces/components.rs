@@ -13,7 +13,7 @@ pub struct Selected {
     pub piece_type: PieceType,
 }
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Reflect, Hash)]
 pub enum PieceColor {
     White,
     Black,
@@ -268,5 +268,30 @@ impl Piece {
         } else {
             (false, None)
         }
+    }
+
+    #[allow(clippy::wrong_self_convention)]
+    const fn from_square(&self, square: &Square) -> Self {
+        Self {
+            color: self.color,
+            piece_type: self.piece_type,
+            x: square.x,
+            y: square.y,
+            first_move: self.first_move,
+        }
+    }
+
+    pub fn is_check(&self, new_position: &Square, pieces: &Query<'_, '_, (Entity, &Self)>) -> bool {
+        let my_color = self.color;
+        let Some((_, enemy_king)) = pieces
+            .iter()
+            .find(|(_, piece)| piece.piece_type == PieceType::King && piece.color != my_color)
+        else {
+            return false;
+        };
+        let enemy_position: Square = enemy_king.into();
+        let piece_new_position = self.from_square(new_position);
+
+        piece_new_position.is_move_valid(&enemy_position, pieces).0
     }
 }

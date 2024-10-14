@@ -92,6 +92,7 @@ pub enum MoveType {
     CastlingRight,
     CastlingLeft,
     Promotion(PieceType),
+    SimpleCheck,
 }
 
 impl std::fmt::Display for MoveType {
@@ -106,6 +107,7 @@ impl std::fmt::Display for MoveType {
                 Self::CastlingRight => "Short Castle".to_string(),
                 Self::CastlingLeft => "Long Castle".to_string(),
                 Self::Promotion(piece) => format!("Promotion to: {}", piece),
+                Self::SimpleCheck => "Check".to_string(),
             }
         )
     }

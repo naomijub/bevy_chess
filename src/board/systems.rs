@@ -68,11 +68,14 @@ pub fn set_selections(
         if let Some(selected_piece_entity) = selected_piece.entity {
             if let Ok((piece_entity, piece)) = pieces.get(selected_piece_entity) {
                 let valid_move = piece.is_move_valid(square, &pieces);
+
+                let is_check = piece.is_check(square, &pieces);
                 if valid_move.0 {
                     move_to_event.send(MoveToEvent {
                         entity: piece_entity,
                         to: (square.x, square.y),
                     });
+
                     // Rook castle move
                     if let Some((entity, column)) = valid_move.1 {
                         move_to_event.send(MoveToEvent {
@@ -91,6 +94,12 @@ pub fn set_selections(
                     } else {
                         action_event.send(ActionEvent {
                             action: PlayerMove::simple(piece, square.into()),
+                        });
+                    }
+
+                    if is_check {
+                        action_event.send(ActionEvent {
+                            action: PlayerMove::check(piece, square.into()),
                         });
                     }
                 }
